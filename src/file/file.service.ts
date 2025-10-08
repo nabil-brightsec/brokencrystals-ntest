@@ -37,29 +37,6 @@ export class FileService {
         throw new Error('Host not allowed');
       }
 
-      // Check for path traversal
-      if (url.pathname.includes('..')) {
-        throw new Error('Path traversal detected');
-      }
-
-      // Check for allowed paths
-      const allowedPaths = [
-        '/metadata/v1',
-        '/metadata/v1.json',
-        '/computeMetadata/v1/',
-        '/latest/meta-data/',
-        '/metadata/instance'
-      ];
-
-      if (!allowedPaths.some(allowedPath => url.pathname.startsWith(allowedPath))) {
-        throw new Error('Path not allowed');
-      }
-
-      // Ensure the URL uses HTTPS
-      if (url.protocol !== 'https:') {
-        throw new Error('Only HTTPS protocol is allowed');
-      }
-
       const content = await this.cloudProviders.get(file);
 
       if (content) {
