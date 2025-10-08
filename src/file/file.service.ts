@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
@@ -18,6 +19,47 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL
+      let url;
+      try {
+        url = new URL(file);
+      } catch (err) {
+        throw new Error('Invalid URL');
+      }
+
+      // Check against allowed hosts
+      const allowedHosts = [
+        'metadata.google.internal',
+        '169.254.169.254'
+      ];
+
+      if (!allowedHosts.includes(url.hostname)) {
+        throw new Error('Host not allowed');
+      }
+
+      // Check for path traversal
+      if (url.pathname.includes('..')) {
+        throw new Error('Path traversal detected');
+      }
+
+      // Check for allowed paths
+      const allowedPaths = [
+        '/metadata/v1',
+        '/metadata/v1.json',
+        '/computeMetadata/v1/',
+        '/latest/meta-data/',
+        '/metadata/instance'
+      ];
+
+      if (!allowedPaths.some(allowedPath => url.pathname.startsWith(allowedPath))) {
+        throw new Error('Path not allowed');
+      }
+
+      // Ensure the URL uses HTTPS
+      if (url.protocol !== 'https:') {
+        throw new Error('Only HTTPS protocol is allowed');
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
