@@ -102,7 +102,7 @@ ${xmlNodes.join('\n')}
       /\bnot\b/i, // Prevent logical NOT
       /\|\|/g, // Prevent double pipe
       /\&\&/g, // Prevent double ampersand
-      /\'\s*\]|\[\s*\'/g, // Prevent unescaped single quotes
+      /'\s*\]|\[\s*'/g, // Prevent unescaped single quotes
       /"\s*\]|\[\s*"/g // Prevent unescaped double quotes
     ];
 
